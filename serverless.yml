@@ -1,0 +1,25 @@
+service: toggl-to-zohoinvoice
+
+provider:
+  name: aws
+  runtime: python3.6
+  region: eu-west-1
+  memorySize: 512
+  timeout: 10
+  stage: prod
+
+package:
+  exclude:
+    - requirements.txt
+    - serverless.yml
+    - README.md
+
+functions:
+  cron:
+    handler: toggl-to-zohoinvoice.run
+    #name: toggl-to-zohoinvoice
+    #description: Toggl to Zoho Invoice connector
+    events:
+      # Invoke Lambda function every 2nd minute from Mon-Fri
+      - schedule: cron(0 7 * * ? *)
+
