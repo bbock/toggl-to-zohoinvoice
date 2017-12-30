@@ -49,8 +49,8 @@ def add_zoho_entry(tte):
     if not zoho_project_id or not zoho_task_id:
         raise ValueError('Could not map IDs for project %s', tte['pid'])
 
-    start_date = arrow.get(tte['start'])
-    end_date = arrow.get(tte['stop'])
+    start_date = arrow.get(tte['start']).to('Europe/Berlin')
+    end_date = arrow.get(tte['stop']).to('Europe/Berlin')
 
     if not start_date.date() == end_date.date():
         raise ValueError("Cannot handle time entries spanning multiple days!")
@@ -60,8 +60,8 @@ def add_zoho_entry(tte):
         'task_id': zoho_task_id,
         'user_id': config.get('Zoho', 'user_id'),
         'log_date': start_date.format('YYYY-MM-DD'),
-        'begin_time': start_date.format('hh:mm'),
-        'end_time': end_date.format('hh:mm'),
+        'begin_time': start_date.format('HH:mm'),
+        'end_time': end_date.format('HH:mm'),
         'notes': str(tte['id'])
     }
 

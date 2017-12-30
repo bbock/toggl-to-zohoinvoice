@@ -12,6 +12,8 @@ It uses the Zoho `notes` field to store Toggl record IDs. This will break if you
 
 It will not detect changes in Toggl after the fact and re-sync automatically, but you can delete the record in Zoho completely and it will re-sync it.
 
+Hardcoded timezone "Europe/Berlin" in Zoho.
+
 ## Configuration
 
 You need to create a `config.ini` file in the project directory:
