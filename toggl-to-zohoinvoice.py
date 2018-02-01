@@ -39,21 +39,27 @@ def add_zoho_entry(tte):
         'organization_id': config.get('Zoho', 'org_id'),
     }
 
+    if not 'pid' in tte:
+        logger.warning('Ignoring timecard without project')
+        return
+
     try:
         mapping = config.get('Mapping', str(tte['pid']))
     except configparser.NoOptionError:
-        logger.warn('Ignoring timecard %s due to missing config', tte['pid'])
+        logger.warning('Ignoring timecard %s due to missing config', tte['pid'])
         return
 
     (zoho_project_id, zoho_task_id) = mapping.split(':')
     if not zoho_project_id or not zoho_task_id:
-        raise ValueError('Could not map IDs for project %s', tte['pid'])
+        logger.warning('Could not map IDs for project %s', tte['pid'])
+        return
 
     start_date = arrow.get(tte['start']).to('Europe/Berlin')
     end_date = arrow.get(tte['stop']).to('Europe/Berlin')
 
     if not start_date.date() == end_date.date():
-        raise ValueError("Cannot handle time entries spanning multiple days!")
+        logger.warning("Cannot handle time entries spanning multiple days!")
+        return
 
     data = {
         'project_id': zoho_project_id,
