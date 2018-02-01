@@ -41,3 +41,9 @@ virtualenv -p python3.6 env
 pip install -r requirements.txt
 serverless deploy
 ```
+
+to update, use
+
+```bash
+serverless deploy function -f cron
+```

@@ -41,25 +41,25 @@ def add_zoho_entry(tte):
 
     if not 'pid' in tte:
         logger.warning('Ignoring timecard without project')
-        return
+        return False
 
     try:
         mapping = config.get('Mapping', str(tte['pid']))
     except configparser.NoOptionError:
         logger.warning('Ignoring timecard %s due to missing config', tte['pid'])
-        return
+        return False
 
     (zoho_project_id, zoho_task_id) = mapping.split(':')
     if not zoho_project_id or not zoho_task_id:
         logger.warning('Could not map IDs for project %s', tte['pid'])
-        return
+        return False
 
     start_date = arrow.get(tte['start']).to('Europe/Berlin')
     end_date = arrow.get(tte['stop']).to('Europe/Berlin')
 
     if not start_date.date() == end_date.date():
         logger.warning("Cannot handle time entries spanning multiple days!")
-        return
+        return False
 
     data = {
         'project_id': zoho_project_id,
@@ -75,6 +75,7 @@ def add_zoho_entry(tte):
     jsonstring = {'JSONString': json.dumps(data)}
     req = requests.post('https://invoice.zoho.eu/api/v3/projects/timeentries', params=params, data=jsonstring)
     req.raise_for_status()
+    return True
 
 def get_toggl_time_entries(start_date, end_date):
     """Get all time entries for a given time period from Toggl"""
@@ -110,8 +111,23 @@ def find_zoho_entry(toggl_time_entry, zoho_time_entries):
     logger.info('Found no matching ZTE for TTE ID %s' % tte_id)
     return False
 
+def notify_ifttt(synced_entries, failed_entries):
+    """Send notification to IFTTT about synced and failed timecards"""
+    maker_key = config.get('IFTTT', 'maker_key')
+    if maker_key:
+        body = {}
+        body["value1"] = str(synced_entries)
+        body["value2"] = str(failed_entries)
+        req = requests.post('https://maker.ifttt.com/trigger/toggl_timesync/with/key/'+maker_key, json=body)
+        req.raise_for_status()
+
+
 def main():
     """ Main entry point of the app """
+
+    synced_entries = 0
+    failed_entries = 0
+
     logger.debug('Retrieving user data')
     me = toggl.me_with_related_data().get()
 
@@ -129,7 +145,14 @@ def main():
 
     for tte in toggl_time_entries:
         if not find_zoho_entry(tte, zoho_time_entries):
-            add_zoho_entry(tte)
+            result = add_zoho_entry(tte)
+            if result:
+                synced_entries += 1
+            else:
+                failed_entries += 1
+
+    notify_ifttt(synced_entries, failed_entries)
+
 
 def run(event, context):
     main()
