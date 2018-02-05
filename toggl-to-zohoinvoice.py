@@ -11,10 +11,7 @@ import sys
 sys.path.insert(0, './env/lib/python3.6/site-packages')
 
 import configparser
-import datetime
 import logging
-import os
-import pprint
 import json
 
 import arrow
@@ -39,7 +36,7 @@ def add_zoho_entry(tte):
         'organization_id': config.get('Zoho', 'org_id'),
     }
 
-    if not 'pid' in tte:
+    if 'pid' not in tte:
         logger.warning('Ignoring timecard without project')
         return False
 
@@ -77,6 +74,7 @@ def add_zoho_entry(tte):
     req.raise_for_status()
     return True
 
+
 def get_toggl_time_entries(start_date, end_date):
     """Get all time entries for a given time period from Toggl"""
     time_entries = toggl.time_entries().get(
@@ -86,6 +84,7 @@ def get_toggl_time_entries(start_date, end_date):
         }
     )
     return time_entries().data
+
 
 def get_zoho_time_entries(start_date, end_date):
     """Get all time entries for a given time period from Zoho"""
@@ -99,6 +98,7 @@ def get_zoho_time_entries(start_date, end_date):
     req = requests.get('https://invoice.zoho.eu/api/v3/projects/timeentries', params=params)
     return req.json()['time_entries']
 
+
 def find_zoho_entry(toggl_time_entry, zoho_time_entries):
     """Find Zoho entry for a given Toggl entry"""
     tte_id = str(toggl_time_entry['id'])
@@ -110,6 +110,7 @@ def find_zoho_entry(toggl_time_entry, zoho_time_entries):
 
     logger.info('Found no matching ZTE for TTE ID %s' % tte_id)
     return False
+
 
 def notify_ifttt(synced_entries, failed_entries):
     """Send notification to IFTTT about synced and failed timecards"""
@@ -136,7 +137,7 @@ def main():
 
     start_sync = arrow.utcnow().shift(days=-7).to(toggl_tz)
     end_sync = arrow.utcnow().shift(days=0).to(toggl_tz)
-    logger.info('Sync from %s until %s' % ( start_sync.format('YYYY-MM-DDTHH:mm:ssZZ'), end_sync.format('YYYY-MM-DDTHH:mm:ssZZ')))
+    logger.info('Sync from %s until %s' % (start_sync.format('YYYY-MM-DDTHH:mm:ssZZ'), end_sync.format('YYYY-MM-DDTHH:mm:ssZZ')))
 
     toggl_time_entries = get_toggl_time_entries(start_sync, end_sync)
     logger.info('Found %d time entries in Toggl for the last 7 days', len(toggl_time_entries))
@@ -155,13 +156,14 @@ def main():
 
 
 def run(event, context):
+    """This is executed by AWS Lambda"""
     main()
     return {
         "message": "Toggl to Zoho sync ran successfully",
         "event": event
     }
 
-if __name__ == "__main__":
-    """ This is executed when run from the command line """
-    main()
 
+if __name__ == "__main__":
+    """This is executed when run from the command line"""
+    main()
