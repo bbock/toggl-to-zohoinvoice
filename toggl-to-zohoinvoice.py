@@ -123,6 +123,18 @@ def notify_ifttt(synced_entries, failed_entries):
         req.raise_for_status()
 
 
+def notify_slack(synced_entries, failed_entries):
+    """Send notification to IFTTT about synced and failed timecards"""
+    webhook_url = config.get('Slack', 'webhook_url')
+    if webhook_url:
+        body = {
+            "username": "Toggl-to-Zoho-Bot",
+            "text": "{} timecards synced, {} ignored or failed".format(synced_entries, failed_entries)
+        }
+        req = requests.post(webhook_url, json=body)
+        req.raise_for_status()
+
+
 def main():
     """ Main entry point of the app """
 
@@ -153,6 +165,7 @@ def main():
                 failed_entries += 1
 
     notify_ifttt(synced_entries, failed_entries)
+    notify_slack(synced_entries, failed_entries)
 
 
 def run(event, context):

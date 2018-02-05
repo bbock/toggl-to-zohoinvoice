@@ -6,6 +6,8 @@ Serverless cron job to sync Toggl time entries to Zoho Invoice. It is designed t
 
 This script syncs the last 7 days (up until yesterday) from Toggl to Zoho invoice.
 
+You are notified about the sync result via Slack.
+
 ## Limitations
 
 It uses the Zoho `notes` field to store Toggl record IDs. This will break if you use notes for something else or modify the content of the field.
@@ -26,6 +28,10 @@ access_token = _your_toggl_access_token_
 api_key = _your_zoho_api_key_
 org_id = _numerical_zoho_organisation_id_
 user_id = _numerical_zoho_user_id_
+
+[Slack]
+webhook_url = _webhook_url_
+
 
 [Mapping]
 # Mapping format is Toggl-Project-ID = zoho_project_id:zoho_task_id
