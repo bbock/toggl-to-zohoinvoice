@@ -1,12 +1,12 @@
 # Toggl to Zoho Invoice connector
 
-![Python 3.6 compatible](https://img.shields.io/badge/python-3.6-green.svg)
+![Python 3.7 compatible](https://img.shields.io/badge/python-3.7-green.svg)
 
 Serverless cron job to sync Toggl time entries to Zoho Invoice. It is designed to run as AWS Lambda function triggered by Cloudwatch.
 
 This script syncs the last 7 days (up until yesterday) from Toggl to Zoho invoice.
 
-You are notified about the sync result via Slack.
+You can be notified about the sync result via Slack.
 
 ## Limitations
 
@@ -43,7 +43,7 @@ webhook_url = _webhook_url_
 ## Installation
 
 ```bash
-virtualenv -p python3.6 env
+virtualenv -p python3 env
 pip install -r requirements.txt
 serverless deploy
 ```

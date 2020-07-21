@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# pylint: disable=C0413
 """
 Toggl to Zoho Invoice connector
 
@@ -16,7 +17,7 @@ import json
 
 import arrow
 import requests
-import tapioca_toggl
+import tapioca_toggl  # pylint: disable=E0401
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('TOGGL')
@@ -114,7 +115,10 @@ def find_zoho_entry(toggl_time_entry, zoho_time_entries):
 
 def notify_ifttt(synced_entries, failed_entries):
     """Send notification to IFTTT about synced and failed timecards"""
-    maker_key = config.get('IFTTT', 'maker_key')
+    try:
+        maker_key = config.get('IFTTT', 'maker_key')
+    except configparser.NoOptionError:
+        return
     if maker_key:
         body = {}
         body["value1"] = str(synced_entries)
@@ -125,7 +129,10 @@ def notify_ifttt(synced_entries, failed_entries):
 
 def notify_slack(synced_entries, failed_entries):
     """Send notification to IFTTT about synced and failed timecards"""
-    webhook_url = config.get('Slack', 'webhook_url')
+    try:
+        webhook_url = config.get('Slack', 'webhook_url')
+    except configparser.NoOptionError:
+        return
     if webhook_url:
         body = {
             "username": "Toggl-to-Zoho-Bot",
@@ -178,5 +185,5 @@ def run(event, context):
 
 
 if __name__ == "__main__":
-    """This is executed when run from the command line"""
+    """This is executed when run from the command line"""  # pylint:disable=W0105
     main()
